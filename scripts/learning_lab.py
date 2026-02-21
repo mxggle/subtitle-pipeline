@@ -6,6 +6,7 @@ Examples:
   python scripts/learning_lab.py extract movie.mkv
   python scripts/learning_lab.py extract movie.mkv --index 0
   python scripts/learning_lab.py extract movie.mkv --language jpn --to-srt
+  python scripts/learning_lab.py merge movie.mkv --languages eng chi --verbose
 """
 
 from __future__ import annotations
@@ -20,6 +21,17 @@ from datetime import timedelta
 from pathlib import Path
 
 
+
+# ---------------------------------------------------------------------------
+# Constants
+# ---------------------------------------------------------------------------
+
+# Merge-overlap thresholds: a secondary subtitle entry is considered to
+# overlap with a primary entry when the overlap duration meets *either*
+# of these criteria.
+MIN_OVERLAP_SECONDS = 0.2   # absolute minimum overlap (200 ms)
+MIN_OVERLAP_RATIO = 0.5     # overlap must exceed 50 % of the shorter entry
+
 CODEC_TO_EXT = {
     "subrip": "srt",
     "ass": "ass",
@@ -28,6 +40,9 @@ CODEC_TO_EXT = {
     "mov_text": "srt",
     "hdmv_pgs_subtitle": "sup",
 }
+
+# Module-level verbosity flag, set by CLI --verbose / --quiet.
+_verbose = False
 
 
 def _parse_srt_time(time_str: str) -> timedelta:
@@ -46,11 +61,21 @@ def _format_srt_time(td: timedelta) -> str:
 
 
 def _parse_srt(content: str) -> list[dict]:
-    """Parse SRT content into a list of dictionaries."""
+    """Parse SRT content into a list of dictionaries.
+
+    Handles both LF and CRLF line endings and ensures the last entry
+    is always captured even when the file lacks a trailing blank line.
+    """
+    # Normalise line endings so the regex always works.
+    content = content.replace("\r\n", "\n").replace("\r", "\n")
+    # Guarantee a trailing double-newline so the non-greedy text group
+    # can always find its terminator.
+    if not content.endswith("\n\n"):
+        content += "\n\n"
+
     entries = []
-    # Pattern to match index, time range, and text tracking until next index or double newline
     pattern = re.compile(
-        r"(\d+)\n(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})\n(.*?)(?=\n\n|\n\d+\n|$)",
+        r"(\d+)\n(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})\n(.*?)(?=\n\n|\n\d+\n)",
         re.DOTALL,
     )
     for match in pattern.finditer(content):
@@ -71,7 +96,15 @@ def _require_bin(name: str) -> None:
 
 
 def _run(cmd: list[str]) -> subprocess.CompletedProcess:
-    return subprocess.run(cmd, capture_output=True, text=True)
+    """Run a subprocess, capturing output with explicit UTF-8 encoding.
+
+    If the module-level ``_verbose`` flag is set, any stderr output is
+    forwarded to the caller's stderr even when the command succeeds.
+    """
+    p = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
+    if _verbose and p.stderr:
+        print(p.stderr, file=sys.stderr)
+    return p
 
 
 def probe_subtitle_streams(input_path: Path) -> list[dict]:
@@ -262,8 +295,7 @@ def merge_streams(
                 o_len = (overlap_end - overlap_start).total_seconds()
                 if o_len > 0:
                     p_len = (p_entry["end"] - p_entry["start"]).total_seconds()
-                    # Attach if overlap is >= 200ms or > 50% of either subtitle
-                    if o_len >= 0.2 or o_len > 0.5 * min(s_len, p_len):
+                    if o_len >= MIN_OVERLAP_SECONDS or o_len > MIN_OVERLAP_RATIO * min(s_len, p_len):
                         overlaps.append(p_entry)
 
             if not overlaps:
@@ -318,6 +350,14 @@ def main() -> int:
     _require_bin("ffmpeg")
 
     parser = argparse.ArgumentParser(description="List and extract subtitle streams")
+    parser.add_argument(
+        "--verbose", "-v", action="store_true",
+        help="show ffmpeg/ffprobe stderr output for debugging",
+    )
+    parser.add_argument(
+        "--quiet", "-q", action="store_true",
+        help="suppress informational output (errors are still printed)",
+    )
     sub = parser.add_subparsers(dest="command", required=True)
 
     p_list = sub.add_parser("list", help="List subtitle streams")
@@ -341,6 +381,10 @@ def main() -> int:
     p_merge.add_argument("--output", type=Path, default=None)
 
     args = parser.parse_args()
+
+    # Set module-level verbosity.
+    global _verbose
+    _verbose = args.verbose
 
     if args.command == "list":
         return list_streams(args.input)

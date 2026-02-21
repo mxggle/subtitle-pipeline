@@ -11,14 +11,16 @@ A comprehensive suite for converting video subtitles into language-learning reso
 
 When processing a video file, determine the subtitle steps based on the user's prompt and the available subtitle tracks in the video:
 
-1. **Multiple Subtitles Available**:
+1. **Multiple Subtitles Available** ✅ Implemented:
    - Merge the relevant subtitle tracks based on the languages requested in the user's prompt (e.g., merge English and Chinese).
 
-2. **Only One Subtitle Available**:
+2. **Only One Subtitle Available** ⚠️ Not yet automated:
    - If the video has only one subtitle track (e.g., English), translate this subtitle to the target language specified by the user's prompt (e.g., Chinese).
+   - *This step currently requires manual translation or an external API. Do not assume the script handles this automatically.*
 
-3. **No Subtitles Available**:
+3. **No Subtitles Available** ⚠️ Not yet automated:
    - If there are no existing subtitles in the video, use the Whisper ASR pipeline to transcribe the audio and generate the subtitles.
+   - *This step requires a separate Whisper setup. Do not assume the script handles this automatically.*
 
 ## Step 1: Inspect & Prepare
 
@@ -45,9 +47,11 @@ Merge multiple subtitle tracks into a single SRT file (e.g., for immersion learn
 # Merge specific indices
 python skills/subtitle-learning-lab/scripts/learning_lab.py merge movie.mkv --indices 0 1 --output movie.bilingual.srt
 
-# Merge by language codes
-python skills/subtitle-learning-lab/scripts/learning_lab.py merge movie.mkv --languages eng jpn
+# Merge by language codes (use --verbose to see ffmpeg output)
+python skills/subtitle-learning-lab/scripts/learning_lab.py --verbose merge movie.mkv --languages eng jpn
 ```
+
+> **Tip:** Use `--verbose` (`-v`) to see ffmpeg/ffprobe stderr for debugging, or `--quiet` (`-q`) to suppress informational output.
 
 ## Step 4: Vocabulary & Translation (Coming Soon)
 
