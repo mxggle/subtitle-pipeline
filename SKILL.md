@@ -14,9 +14,8 @@ When processing a video file, determine the subtitle steps based on the user's p
 1. **Multiple Subtitles Available** ✅ Implemented:
    - Merge the relevant subtitle tracks based on the languages requested in the user's prompt (e.g., merge English and Chinese).
 
-2. **Only One Subtitle Available** ⚠️ Not yet automated:
-   - If the video has only one subtitle track (e.g., English), translate this subtitle to the target language specified by the user's prompt (e.g., Chinese).
-   - *This step currently requires manual translation or an external API. Do not assume the script handles this automatically.*
+2. **Only One Subtitle Available** ✅ Implemented:
+   - If the video has only one subtitle track (e.g., English), translate this subtitle to the target language specified by the user's prompt (e.g., Chinese) using the new LLM context-aware translation tool.
 
 3. **No Subtitles Available** ⚠️ Not yet automated:
    - If there are no existing subtitles in the video, use the Whisper ASR pipeline to transcribe the audio and generate the subtitles.
@@ -53,11 +52,28 @@ python skills/subtitle-learning-lab/scripts/learning_lab.py --verbose merge movi
 
 > **Tip:** Use `--verbose` (`-v`) to see ffmpeg/ffprobe stderr for debugging, or `--quiet` (`-q`) to suppress informational output.
 
-## Step 4: Vocabulary & Translation (Coming Soon)
+## Step 4: AI Context-Aware Translation
+
+If there is only one track, or you wish to generate a new language track from an existing one, use the `translate` command. It uses an OpenAI-compatible LLM (defaults to gpt-4o-mini, but works great with DeepSeek) to translate chunks of subtitles while looking at the surrounding context (like a real movie translator) to ensure accuracy:
+
+```bash
+# Set your API key in a .env file first (e.g., an OpenAI or Gemini API key):
+# OPENAI_API_KEY="..."
+
+# Translate an existing SRT file or extract+translate directly from a video (defaults to gpt-4o-mini):
+python skills/subtitle-learning-lab/scripts/learning_lab.py translate movie.eng.srt --target-language "Chinese"
+
+# If you want to use your Gemini API Key instead, point the SDK to Google:
+python skills/subtitle-learning-lab/scripts/learning_lab.py translate movie.eng.srt \
+  --target-language "Chinese" \
+  --base-url "https://generativelanguage.googleapis.com/v1beta/" \
+  --model "gemini-2.5-flash"
+```
+
+## Step 5: Vocabulary Lab (Coming Soon)
 
 Future features include:
 - `analyze`: Generate vocabulary frequency lists and definitions.
-- `translate`: Auto-translate tracks using LLM or Translate APIs.
 - `learning-pack`: Package multiple tracks for immersion practice.
 
 ## Step 5: Generate Learning Markdown

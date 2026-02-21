@@ -13,12 +13,23 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import subprocess
 import sys
 from datetime import timedelta
 from pathlib import Path
+
+try:
+    from openai import OpenAI
+except ImportError:
+    OpenAI = None
+
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    load_dotenv = None
 
 
 
@@ -84,6 +95,7 @@ def _parse_srt(content: str) -> list[dict]:
                 "start": _parse_srt_time(match.group(2)),
                 "end": _parse_srt_time(match.group(3)),
                 "text": match.group(4).strip(),
+                "index": int(match.group(1)),
             }
         )
     return entries
@@ -345,6 +357,152 @@ def merge_streams(
     return 0
 
 
+def _chunk_list(lst: list, chunk_size: int) -> list[list]:
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), chunk_size):
+        yield lst[i:i + chunk_size]
+
+
+def translate_chunk(client, chunk: list[dict], target_language: str, model: str) -> list[str]:
+    """Translate a chunk of subtitle dictionaries using the LLM.
+    Returns a list of translated text strings corresponding to the input chunk.
+    """
+    if not OpenAI:
+        raise RuntimeError("openai is not installed. Run: pip install openai")
+        
+    prompt = f"You are a professional movie translator. Translate the following subtitle lines to {target_language}.\n\n"
+    prompt += "Respond ONLY with the translated lines, separated by the exact delimiter `|||`.\n"
+    prompt += f"There are exactly {len(chunk)} lines. You MUST return exactly {len(chunk)} translated blocks separated by `|||`. Do not include original text, notes, or preambles.\n"
+    prompt += "Look at the surrounding context to resolve ambiguities, but keep the translations vertically aligned to the original indices.\n\n"
+    
+    for entry in chunk:
+        prompt += f"Line {entry['index']}: {entry['text']}\n"
+
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": "You are a professional subtitle translator. Do not include extra conversational text."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.3
+        )
+        
+        content = response.choices[0].message.content
+        # Split by the specific delimiter
+        parts = content.split("|||")
+        # Clean up whitespace around parts
+        translated_texts = [p.strip() for p in parts]
+        
+        # Fallback/Safety Check: Ensure strictly identical length
+        if len(translated_texts) != len(chunk):
+            print(f"Warning: LLM returned {len(translated_texts)} lines instead of {len(chunk)}. "
+                  "Attempting line-by-line fallback split...", file=sys.stderr)
+            # Try splitting by newlines if the delimiter failed and we have an exact match on lines
+            fallback_parts = [p.strip() for p in content.strip().split('\n') if p.strip()]
+            if len(fallback_parts) == len(chunk):
+                translated_texts = fallback_parts
+            else:
+                raise ValueError(f"LLM translation alignment failed: Expected {len(chunk)} translations, got {len(translated_texts)}.")
+                
+        return translated_texts
+        
+    except Exception as e:
+        print(f"Error calling LLM: {e}", file=sys.stderr)
+        raise
+
+def translate_stream(
+    input_path: Path,
+    output_path: Path | None,
+    target_language: str,
+    api_key: str | None = None,
+    base_url: str | None = None,
+    model: str = "gpt-4o-mini"
+) -> int:
+    """Extract a track (if video), and translate using LLM context chunking."""
+    if not OpenAI:
+        print("error: openai package is required. Run 'pip install openai'", file=sys.stderr)
+        return 1
+        
+    if load_dotenv:
+        load_dotenv()
+        
+    # Setup LLM Client
+    client_api_key = api_key or os.environ.get("OPENAI_API_KEY")
+    if not client_api_key:
+        print("error: API key is required via --api-key or OPENAI_API_KEY env var in .env file.", file=sys.stderr)
+        return 1
+        
+    client = OpenAI(api_key=client_api_key, base_url=base_url)
+
+    # If it's not an srt, assume it's a video and try to extract the first track to a temporary file,
+    # or fail if multiple tracks? For now assume it's already an SRT if it ends with .srt
+    srt_content = ""
+    is_temp_srt = False
+    temp_srt_path = input_path.with_suffix(".tmp.srt")
+    
+    if input_path.suffix.lower() == ".srt":
+        srt_content = input_path.read_text(encoding="utf-8")
+    else:
+        print(f"Extracting primary subtitle stream from {input_path.name} to translate...")
+        ret = extract_stream(input_path, temp_srt_path, index=0, language=None, to_srt=True)
+        if ret != 0:
+            return ret
+        srt_content = temp_srt_path.read_text(encoding="utf-8")
+        is_temp_srt = True
+
+    entries = _parse_srt(srt_content)
+    if not entries:
+        print("error: No subtitle entries found to translate.", file=sys.stderr)
+        if is_temp_srt and temp_srt_path.exists(): temp_srt_path.unlink()
+        return 1
+
+    print(f"Translating {len(entries)} subtitle segments to {target_language} using Gemini...")
+    
+    # Process in chunks of 50
+    CHUNK_SIZE = 50
+    translated_entries = []
+    chunks = list(_chunk_list(entries, CHUNK_SIZE))
+    
+    try:
+        for i, chunk in enumerate(chunks, 1):
+            if _verbose:
+                print(f"Translating chunk {i}/{len(chunks)}...", file=sys.stderr)
+            texts = translate_chunk(client, chunk, target_language, model=model)
+            for entry, trans_text in zip(chunk, texts):
+                # Copy the entry and update the text
+                translated_entries.append({
+                    "start": entry["start"],
+                    "end": entry["end"],
+                    "text": trans_text
+                })
+    except Exception as e:
+        print("Translation aborted due to an error.", file=sys.stderr)
+        if is_temp_srt and temp_srt_path.exists(): temp_srt_path.unlink()
+        return 1
+
+    # Format back to SRT
+    lines = []
+    for i, entry in enumerate(translated_entries, 1):
+        lines.append(str(i))
+        lines.append(f"{_format_srt_time(entry['start'])} --> {_format_srt_time(entry['end'])}")
+        lines.append(entry["text"])
+        lines.append("")
+        
+    translated_srt_content = "\n".join(lines)
+    
+    if output_path is None:
+        output_path = input_path.parent / f"{input_path.stem}.{target_language.lower()}.srt"
+        
+    output_path.write_text(translated_srt_content, encoding="utf-8")
+    print(f"Translation complete! Saved to {output_path}")
+    
+    if is_temp_srt and temp_srt_path.exists():
+        temp_srt_path.unlink()
+        
+    return 0
+
+
 def main() -> int:
     _require_bin("ffprobe")
     _require_bin("ffmpeg")
@@ -379,6 +537,14 @@ def main() -> int:
         "--languages", type=str, nargs="+", help="language codes to merge (e.g. eng jpn)"
     )
     p_merge.add_argument("--output", type=Path, default=None)
+    
+    p_translate = sub.add_parser("translate", help="Translate a subtitle file or stream to a target language using openai SDK")
+    p_translate.add_argument("input", type=Path, help="input .srt file or video file")
+    p_translate.add_argument("--target-language", type=str, required=True, help="target language to translate to (e.g. Chinese)")
+    p_translate.add_argument("--api-key", type=str, help="API Key (or set OPENAI_API_KEY env var in .env)")
+    p_translate.add_argument("--base-url", type=str, help="Custom Base URL for alternative providers (e.g. DeepSeek, vLLM)")
+    p_translate.add_argument("--model", type=str, default="gpt-4o-mini", help="Model name to use (default: gpt-4o-mini)")
+    p_translate.add_argument("--output", type=Path, default=None, help="output .srt file path")
 
     args = parser.parse_args()
 
@@ -400,6 +566,9 @@ def main() -> int:
             print("error: use either --indices or --languages, not both", file=sys.stderr)
             return 2
         return merge_streams(args.input, args.output, args.indices, args.languages)
+
+    if args.command == "translate":
+        return translate_stream(args.input, args.output, args.target_language, args.api_key, args.base_url, args.model)
 
     return 0
 

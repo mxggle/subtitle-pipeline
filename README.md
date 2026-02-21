@@ -49,14 +49,18 @@ flowchart TD
 ## Quick Start
 
 ```bash
-# 1. List subtitle tracks in a video
+# List all subtitles in a video
 python scripts/learning_lab.py list movie.mkv
 
-# 2. Extract a single track to SRT
-python scripts/learning_lab.py extract movie.mkv --language eng --to-srt
+# Extract the Japanese track and convert it to SRT
+python scripts/learning_lab.py extract movie.mkv --language jpn --to-srt
 
-# 3. Merge two tracks into a bilingual SRT
-python scripts/learning_lab.py merge movie.mkv --languages eng chi
+# Merge English and Japanese streams into a single bilingual SRT
+python scripts/learning_lab.py merge movie.mkv --languages eng jpn
+
+# Translate an existing subtitle track using OpenAI/DeepSeek contextually
+# (Make sure OPENAI_API_KEY is defined in your .env file)
+python scripts/learning_lab.py translate movie.eng.srt --target-language "Chinese"
 ```
 
 ## CLI Reference
@@ -68,6 +72,11 @@ python scripts/learning_lab.py list <video>
 ```
 
 Prints a table of all subtitle streams with their index, language, codec, and title.
+
+- Extract specific tracks dynamically, bypassing intermediate files
+- Merge multiple subtitle streams efficiently based on precise dialogue timing overlaps
+- Context-Aware Translation using API providers like OpenAI, DeepSeek, Groq, etc. (retaining accurate timestamps)
+- High safety guarantees: avoids transcoding workflows entirely
 
 ### `extract` — Pull out a single track
 
@@ -135,6 +144,34 @@ The merge algorithm aligns secondary subtitle tracks against a primary track usi
 
 This produces clean bilingual subtitles where translations appear directly below the original text.
 
+### `translate`
+
+Use an LLM (OpenAI-compatible) to translate a batch of subtitles while considering the surrounding dialogue context. This ensures the engine acts like a real movie translator. Returns perfectly aligned `.srt` files.
+
+You must install `openai` and `python-dotenv`: `pip install openai python-dotenv`.
+Store your API key in a `.env` file at the root of the project:
+```bash
+OPENAI_API_KEY="sk-..."
+```
+
+```bash
+# Pass an extracted `.srt` file directly (Defaults to gpt-4o-mini)
+python scripts/learning_lab.py translate ./movie.eng.srt --target-language "Japanese"
+
+# Translate using DeepSeek by overriding the base URL and model!
+python scripts/learning_lab.py translate ./movie.mkv \
+  --target-language "French" \
+  --base-url "https://api.deepseek.com" \
+  --model "deepseek-chat"
+
+# Translate using Gemini API Keys (OpenAI SDK is fully compatible!)
+# Add OPENAI_API_KEY="your-gemini-key" to your .env file
+python scripts/learning_lab.py translate ./movie.eng.srt \
+  --target-language "German" \
+  --base-url "https://generativelanguage.googleapis.com/v1beta/" \
+  --model "gemini-2.5-flash"
+```
+
 ## Running Tests
 
 ```bash
@@ -158,7 +195,7 @@ When files are packaged for study, the following convention is used:
 ## Roadmap
 
 - [ ] `analyze` — Vocabulary frequency lists and definitions
-- [ ] `translate` — Auto-translate tracks via LLM or API
+- [x] `translate` — Auto-translate tracks via LLM or API
 - [ ] `learning-pack` — All-in-one study package generator
 - [ ] Whisper ASR integration for videos with no subtitles
 
