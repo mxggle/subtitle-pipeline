@@ -1,115 +1,73 @@
 ---
 name: subtitle-learning-lab
-description: "Extract, translate, and analyze subtitles for language learning. Use for: (1) extracting subtitle tracks, (2) automated translation/alignment, (3) vocabulary extraction, and (4) creating study-ready subtitle files."
+description: "Subtitle processing engine: list/extract/transcribe/translate/merge subtitle tracks from local media files."
 ---
 
-# Subtitle Learning Lab
+# Subtitle Learning Lab (Engine Scope)
 
-A comprehensive suite for converting video subtitles into language-learning resources. This tool handles everything from raw extraction to advanced vocabulary analysis and translation.
+This skill is now focused on **subtitle processing only**.
+
+It handles:
+1. Listing subtitle streams
+2. Extracting subtitle tracks
+3. Transcribing audio/video to SRT (Whisper)
+4. Translating subtitle tracks (OpenAI-compatible APIs)
+5. Merging multilingual tracks into bilingual/multilingual SRT
+
+It does **not** generate learning markdown/vocabulary packs anymore.
 
 ## Workflow Decision Tree
 
-When processing a video file, determine the subtitle steps based on the user's prompt and the available subtitle tracks in the video:
+When processing a video file, choose the path based on available subtitles:
 
-1. **Multiple Subtitles Available** ✅ Implemented:
-   - Merge the relevant subtitle tracks based on the languages requested in the user's prompt (e.g., merge English and Chinese).
+1. **Multiple subtitles available** → merge selected tracks.
+2. **Only one subtitle available** → translate to target language if needed.
+3. **No subtitles available** → transcribe with Whisper, then optionally translate/merge.
 
-2. **Only One Subtitle Available** ✅ Implemented:
-   - If the video has only one subtitle track (e.g., English), translate this subtitle to the target language specified by the user's prompt (e.g., Chinese) using the new LLM context-aware translation tool.
+## Commands
 
-3. **No Subtitles Available** ✅ Implemented:
-   - If there are no existing subtitles in the video, use the `transcribe` command to generate them automatically using the Whisper ASR pipeline.
-   - *This step requires the `whisper` CLI to be installed (e.g., `pip install openai-whisper`).*
-
-## Step 1: Inspect & Prepare
-
-List available subtitle streams in a video file:
-
+### 1) List streams
 ```bash
 python skills/subtitle-learning-lab/scripts/learning_lab.py list movie.mkv
 ```
 
-## Step 2: Extract & Convert
-
-Extract a specific track and convert to SRT if needed:
-
+### 2) Extract track
 ```bash
-# Auto-detect language and extract to SRT
 python skills/subtitle-learning-lab/scripts/learning_lab.py extract movie.mkv --to-srt
+python skills/subtitle-learning-lab/scripts/learning_lab.py extract movie.mkv --language eng --to-srt
 ```
 
-## Step 2b: Transcribe Audio (Whisper ASR)
-
-If the video has no existing subtitles, generate them using the `transcribe` command:
-
+### 3) Transcribe (Whisper)
 ```bash
-# Transcribe audio to a subtitle file (auto-detects language by default)
 python skills/subtitle-learning-lab/scripts/learning_lab.py transcribe movie.mkv
-
-# Specify the language and model (default model is 'turbo')
-python skills/subtitle-learning-lab/scripts/learning_lab.py transcribe movie.mkv --language ja --model small
-```
-*Note: This requires the `whisper` CLI to be installed (e.g., `pip install openai-whisper`).*
-
-## Step 3: Merge Subtitles (Bilingual)
-
-Merge multiple subtitle tracks into a single SRT file (e.g., for immersion learning):
-
-```bash
-# Merge specific indices
-python skills/subtitle-learning-lab/scripts/learning_lab.py merge movie.mkv --indices 0 1 --output movie.bilingual.srt
-
-# Merge by language codes (use --verbose to see ffmpeg output)
-python skills/subtitle-learning-lab/scripts/learning_lab.py --verbose merge movie.mkv --languages eng jpn
+python skills/subtitle-learning-lab/scripts/learning_lab.py transcribe movie.mkv --language en --model small
 ```
 
-> **Tip:** Use `--verbose` (`-v`) to see ffmpeg/ffprobe stderr for debugging, or `--quiet` (`-q`) to suppress informational output.
-
-## Step 4: AI Context-Aware Translation
-
-If there is only one track, or you wish to generate a new language track from an existing one, use the `translate` command. It uses an OpenAI-compatible LLM (defaults to gpt-4o-mini, but works great with DeepSeek) to translate chunks of subtitles while looking at the surrounding context (like a real movie translator) to ensure accuracy:
-
+### 4) Translate
 ```bash
-# Set your API key in a .env file first (e.g., an OpenAI or Gemini API key):
-# OPENAI_API_KEY="..."
-
-# Translate an existing SRT file or extract+translate directly from a video (defaults to gpt-4o-mini):
+# Requires OPENAI_API_KEY (or --api-key)
 python skills/subtitle-learning-lab/scripts/learning_lab.py translate movie.eng.srt --target-language "Chinese"
-
-# If you want to use your Gemini API Key instead, point the SDK to Google:
-python skills/subtitle-learning-lab/scripts/learning_lab.py translate movie.eng.srt \
-  --target-language "Chinese" \
-  --base-url "https://generativelanguage.googleapis.com/v1beta/" \
-  --model "gemini-2.5-flash"
 ```
 
-## Step 5: Vocabulary Lab (Coming Soon)
+### 5) Merge
+```bash
+python skills/subtitle-learning-lab/scripts/learning_lab.py merge movie.mkv --indices 0 1 --output movie.bilingual.srt
+python skills/subtitle-learning-lab/scripts/learning_lab.py --verbose merge movie.mkv --languages eng chi
+```
 
-Future features include:
-- `analyze`: Generate vocabulary frequency lists and definitions.
-- `learning-pack`: Package multiple tracks for immersion practice.
+## Output Naming (Engine)
 
-## Step 5: Generate Learning Markdown
+- `movie.eng.srt` (source/reference)
+- `movie.zho.srt` (translated output)
+- `movie.eng-chi.merged.srt` (merged bilingual output)
 
-In addition to generating the subtitle file, create a corresponding Markdown file to help the user learn from the content. This file marks the timing of the video and should have the following structure for each subtitle segment:
-1. **Original Language**: The original language text.
-2. **Target Language**: The translated target language text.
-3. **Vocabulary Hint**: Explanations of difficult vocabulary, chosen specifically based on the user's documented language proficiency level.
+## Guardrails
 
-## Packaging for Study
-
-When preparing files for study, use the following naming convention:
-- `movie.eng.srt` (Reference)
-- `movie.jpn.srt` (Target Language)
-- `movie.vocab.csv` (Study List)
-- `movie.learning.md` (Learning Markdown File)
-
-## Quality + Safety Guardrails
-
-- **Zero Loss**: Prefer stream copy (`-c:s copy`) for extraction when possible.
-- **I/O Efficiency**: Avoid re-encoding video streams; focus only on subtitle data.
-- **Privacy**: Process transcripts locally or via secure API endpoints when translating.
+- Prefer subtitle-only operations; avoid video re-encoding.
+- Use `-c:s copy` where possible for lossless extraction.
+- Keep translation alignment stable with source timestamps.
+- Treat long local ASR jobs as expensive; split/chunk if needed.
 
 ## Reference
 
-- `references/subtitle-notes.md`: Compatibility and technical specs.
+- `references/subtitle-notes.md`

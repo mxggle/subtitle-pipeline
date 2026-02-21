@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""List and extract subtitle streams from local video files for language learning.
+"""Subtitle processing CLI for local media files.
 
 Examples:
   python scripts/learning_lab.py list movie.mkv
   python scripts/learning_lab.py extract movie.mkv
   python scripts/learning_lab.py extract movie.mkv --index 0
-  python scripts/learning_lab.py extract movie.mkv --language jpn --to-srt
+  python scripts/learning_lab.py extract movie.mkv --language eng --to-srt
+  python scripts/learning_lab.py transcribe movie.mkv --model turbo
+  python scripts/learning_lab.py translate movie.eng.srt --target-language "Chinese"
   python scripts/learning_lab.py merge movie.mkv --languages eng chi --verbose
 """
 
@@ -457,7 +459,7 @@ def translate_stream(
         if is_temp_srt and temp_srt_path.exists(): temp_srt_path.unlink()
         return 1
 
-    print(f"Translating {len(entries)} subtitle segments to {target_language} using Gemini...")
+    print(f"Translating {len(entries)} subtitle segments to {target_language}...")
     
     # Process in chunks of 50
     CHUNK_SIZE = 50
@@ -551,7 +553,7 @@ def main() -> int:
     _require_bin("ffprobe")
     _require_bin("ffmpeg")
 
-    parser = argparse.ArgumentParser(description="List and extract subtitle streams")
+    parser = argparse.ArgumentParser(description="Subtitle processing CLI (list/extract/transcribe/translate/merge)")
     parser.add_argument(
         "--verbose", "-v", action="store_true",
         help="show ffmpeg/ffprobe stderr output for debugging",

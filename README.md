@@ -1,204 +1,121 @@
 # 🎬 Subtitle Learning Lab
 
-Turn video subtitles into language-learning resources. Extract, merge, translate, and study — all from one CLI.
+A practical subtitle engine for local media: **list, extract, transcribe, translate, and merge** subtitle tracks.
 
-## Skill Workflow
+> Scope note: this repo is now **engine-only**. Learning markdown/vocabulary generation is being split into a separate skill.
+
+## Core Workflow
 
 ```mermaid
 flowchart TD
-    A["🎬 Video File"] --> B{"Inspect subtitle\ntracks"}
-    B --> C{"How many\nsubtitle tracks?"}
-
-    C -->|"≥ 2 tracks"| D["✅ Merge Tracks\n(bilingual SRT)"]
-    C -->|"1 track"| E["✅ Translate\n(implemented)"]
-    C -->|"0 tracks"| F["✅ Whisper ASR\n(implemented)"]
-
-    D --> G["📝 Generate\nLearning Markdown"]
-    E --> G
+    A[Video/Audio File] --> B{Subtitles present?}
+    B -->|Yes, multiple| C[Merge selected tracks]
+    B -->|Yes, one| D[Translate if needed]
+    B -->|No| E[Transcribe with Whisper]
+    E --> D
+    D --> F[Optional merge]
+    C --> G[Output SRT]
     F --> G
-
-    G --> H["📦 Package for Study"]
-
-    H --> I["movie.eng.srt"]
-    H --> J["movie.jpn.srt"]
-    H --> K["movie.vocab.csv"]
-    H --> L["movie.learning.md"]
-
-    style A fill:#4a90d9,stroke:#2c5f8a,color:#fff
-    style B fill:#5b6abf,stroke:#3d478a,color:#fff
-    style C fill:#7c5cbf,stroke:#553d8a,color:#fff
-    style D fill:#27ae60,stroke:#1e8449,color:#fff
-    style E fill:#27ae60,stroke:#1e8449,color:#fff
-    style F fill:#27ae60,stroke:#1e8449,color:#fff
-    style G fill:#5b6abf,stroke:#3d478a,color:#fff
-    style H fill:#4a90d9,stroke:#2c5f8a,color:#fff
-    style I fill:#2c3e50,stroke:#1a252f,color:#ecf0f1
-    style J fill:#2c3e50,stroke:#1a252f,color:#ecf0f1
-    style K fill:#2c3e50,stroke:#1a252f,color:#ecf0f1
-    style L fill:#2c3e50,stroke:#1a252f,color:#ecf0f1
 ```
 
-> ✅ = implemented &nbsp;&nbsp; ⚠️ = planned
+## Features
+
+- Inspect subtitle streams in MKV/MP4/etc.
+- Extract subtitle tracks by index or language
+- Convert subtitle tracks to SRT
+- Transcribe audio/video to SRT via Whisper
+- Translate subtitle files with OpenAI-compatible APIs
+- Merge tracks using overlap-based alignment
 
 ## Prerequisites
 
-- **Python 3.9+**
-- **ffmpeg** and **ffprobe** on your `PATH`
-- **pytest** (for running tests)
+- Python 3.9+
+- `ffmpeg` + `ffprobe`
+- Optional for translate: `openai`, `python-dotenv`
+- Optional for transcribe: `whisper` CLI
 
 ## Quick Start
 
 ```bash
-# List all subtitles in a video
+# 1) List subtitle tracks
 python scripts/learning_lab.py list movie.mkv
 
-# Extract the Japanese track and convert it to SRT
-python scripts/learning_lab.py extract movie.mkv --language jpn --to-srt
+# 2) Extract English subtitle track to SRT
+python scripts/learning_lab.py extract movie.mkv --language eng --to-srt
 
-# Merge English and Japanese streams into a single bilingual SRT
-python scripts/learning_lab.py merge movie.mkv --languages eng jpn
-
-# Translate an existing subtitle track using OpenAI/DeepSeek contextually
-# (Make sure OPENAI_API_KEY is defined in your .env file)
+# 3) Translate SRT to Chinese
 python scripts/learning_lab.py translate movie.eng.srt --target-language "Chinese"
+
+# 4) Merge English + Chinese tracks from container
+python scripts/learning_lab.py merge movie.mkv --languages eng chi
+
+# 5) If no subtitles exist, transcribe first
+python scripts/learning_lab.py transcribe movie.mkv --model turbo
 ```
 
-## CLI Reference
+## CLI Commands
 
-### `list` — Inspect subtitle streams
-
+### `list`
 ```bash
 python scripts/learning_lab.py list <video>
 ```
 
-Prints a table of all subtitle streams with their index, language, codec, and title.
-
-- Extract specific tracks dynamically, bypassing intermediate files
-- Merge multiple subtitle streams efficiently based on precise dialogue timing overlaps
-- Context-Aware Translation using API providers like OpenAI, DeepSeek, Groq, etc. (retaining accurate timestamps)
-- High safety guarantees: avoids transcoding workflows entirely
-
-### `extract` — Pull out a single track
-
+### `extract`
 ```bash
-python scripts/learning_lab.py extract <video> [options]
+python scripts/learning_lab.py extract <video> [--index N | --language CODE] [--to-srt] [--output PATH]
 ```
 
-| Flag | Description |
-|------|-------------|
-| `--index N` | Select by 0-based subtitle index |
-| `--language CODE` | Select by language code (e.g. `eng`, `jpn`, `chi`) |
-| `--to-srt` | Convert to SRT format on extraction |
-| `--output PATH` | Custom output path (auto-generated if omitted) |
-
-### `merge` — Combine multiple tracks
-
+### `merge`
 ```bash
-python scripts/learning_lab.py merge <video> [options]
+python scripts/learning_lab.py merge <video> [--indices N N | --languages CODE CODE] [--output PATH]
 ```
 
-| Flag | Description |
-|------|-------------|
-| `--indices N N` | Select tracks by 0-based index |
-| `--languages CODE CODE` | Select tracks by language code |
-| `--output PATH` | Custom output path (auto-generated if omitted) |
+### `translate`
+```bash
+python scripts/learning_lab.py translate <srt-or-video> --target-language "Chinese" [--api-key ...] [--base-url ...] [--model ...] [--output ...]
+```
 
-### Global Flags
+### `transcribe`
+```bash
+python scripts/learning_lab.py transcribe <video-or-audio> [--model turbo] [--language en] [--output PATH]
+```
 
-| Flag | Description |
-|------|-------------|
-| `--verbose`, `-v` | Show ffmpeg/ffprobe stderr for debugging |
-| `--quiet`, `-q` | Suppress informational output (errors still print) |
+## Output Convention
 
-> **Note:** Global flags must come *before* the subcommand:
-> ```bash
-> python scripts/learning_lab.py --verbose merge movie.mkv --languages eng chi
-> ```
+- `movie.eng.srt`
+- `movie.zho.srt`
+- `movie.eng-chi.merged.srt`
 
 ## Project Structure
 
-```
+```text
 subtitle-learning-lab/
-├── SKILL.md                 # Agent skill definition (instructions for AI)
-├── README.md                # This file
+├── SKILL.md
+├── README.md
 ├── scripts/
-│   └── learning_lab.py      # Main CLI tool
+│   └── learning_lab.py
 ├── tests/
-│   ├── __init__.py
-│   └── test_merge.py        # pytest suite (15 tests)
+│   ├── test_merge.py
+│   └── test_translation.py
 └── references/
-    └── subtitle-notes.md    # Compatibility & technical notes
+    └── subtitle-notes.md
 ```
 
-## How the Merge Works
+## Development
 
-The merge algorithm aligns secondary subtitle tracks against a primary track using **time-overlap matching**:
-
-1. Each secondary entry is compared against every primary entry.
-2. An overlap is detected when the intersection duration meets *either* threshold:
-   - ≥ **200 ms** absolute overlap, *or*
-   - \> **50%** of the shorter entry's duration
-3. Overlapping entries are combined (text joined with `\n`).
-4. Non-overlapping secondary entries are kept as standalone.
-5. The final output is sorted by start time.
-
-This produces clean bilingual subtitles where translations appear directly below the original text.
-
-### `translate`
-
-Use an LLM (OpenAI-compatible) to translate a batch of subtitles while considering the surrounding dialogue context. This ensures the engine acts like a real movie translator. Returns perfectly aligned `.srt` files.
-
-You must install `openai` and `python-dotenv`: `pip install openai python-dotenv`.
-Store your API key in a `.env` file at the root of the project:
+Run tests:
 ```bash
-OPENAI_API_KEY="sk-..."
+python3 -m pytest tests -v
 ```
-
-```bash
-# Pass an extracted `.srt` file directly (Defaults to gpt-4o-mini)
-python scripts/learning_lab.py translate ./movie.eng.srt --target-language "Japanese"
-
-# Translate using DeepSeek by overriding the base URL and model!
-python scripts/learning_lab.py translate ./movie.mkv \
-  --target-language "French" \
-  --base-url "https://api.deepseek.com" \
-  --model "deepseek-chat"
-
-# Translate using Gemini API Keys (OpenAI SDK is fully compatible!)
-# Add OPENAI_API_KEY="your-gemini-key" to your .env file
-python scripts/learning_lab.py translate ./movie.eng.srt \
-  --target-language "German" \
-  --base-url "https://generativelanguage.googleapis.com/v1beta/" \
-  --model "gemini-2.5-flash"
-```
-
-## Running Tests
-
-```bash
-python3 -m pytest tests/ -v
-```
-
-All tests run without ffmpeg — they test the pure-Python parsing and merge logic in isolation.
-
-## Output Naming Convention
-
-When files are packaged for study, the following convention is used:
-
-| File | Purpose |
-|------|---------|
-| `movie.eng.srt` | Reference language |
-| `movie.jpn.srt` | Target language |
-| `movie.eng-jpn.merged.srt` | Bilingual merged SRT |
-| `movie.vocab.csv` | Vocabulary study list |
-| `movie.learning.md` | Learning markdown with vocab hints |
 
 ## Roadmap
 
-- [ ] `analyze` — Vocabulary frequency lists and definitions
-- [x] `translate` — Auto-translate tracks via LLM or API
-- [ ] `learning-pack` — All-in-one study package generator
-- [x] Whisper ASR integration for videos with no subtitles
+- [x] list / extract / merge
+- [x] OpenAI-compatible translation
+- [x] Whisper transcription
+- [ ] API-backed transcription provider interface (optional backend)
+- [ ] Chunked long-video pipeline for reliability
 
 ## License
 
-Internal skill — not distributed externally.
+Internal skill / private workflow project.
