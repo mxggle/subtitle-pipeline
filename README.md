@@ -53,6 +53,27 @@ python scripts/pipeline.py merge movie.mkv --languages eng chi
 python scripts/pipeline.py transcribe movie.mkv --model turbo
 ```
 
+## Install as an OpenClaw Skill
+
+```bash
+npx skills add https://github.com/mxggle/subtitle-pipeline --skill subtitle-pipeline --agent openclaw --yes
+```
+
+Optional (install globally for all projects):
+
+```bash
+npx skills add https://github.com/mxggle/subtitle-pipeline --skill subtitle-pipeline --agent openclaw --global --yes
+```
+
+## Publish & Discovery Essentials
+
+If you want people to find and use this skill:
+
+1. Keep the repo **public**.
+2. Keep `SKILL.md` clean (`name` + clear `description`).
+3. Put the install snippet above in the README and share it in communities.
+4. Submit to curated skill lists/directories (e.g. skills ecosystem repos) for discovery.
+
 ## CLI Commands
 
 ### `list`
