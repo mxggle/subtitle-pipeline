@@ -53,16 +53,26 @@ python scripts/pipeline.py merge movie.mkv --languages eng chi
 python scripts/pipeline.py transcribe movie.mkv --model turbo
 ```
 
-## Install as an OpenClaw Skill
+## Install (Universal Agent Skills CLI)
+
+Works across supported agents (OpenClaw, Codex, Claude Code, Cursor, etc.).
 
 ```bash
-npx skills add https://github.com/mxggle/subtitle-pipeline --skill subtitle-pipeline --agent openclaw --yes
+# Let skills CLI prompt/select target agents interactively
+npx skills add https://github.com/mxggle/subtitle-pipeline --skill subtitle-pipeline --yes
 ```
 
-Optional (install globally for all projects):
+Non-interactive examples:
 
 ```bash
-npx skills add https://github.com/mxggle/subtitle-pipeline --skill subtitle-pipeline --agent openclaw --global --yes
+# Install to specific agents
+npx skills add https://github.com/mxggle/subtitle-pipeline --skill subtitle-pipeline --agent openclaw --agent codex --yes
+
+# Install globally (all projects)
+npx skills add https://github.com/mxggle/subtitle-pipeline --skill subtitle-pipeline --global --yes
+
+# Install to all supported agents
+npx skills add https://github.com/mxggle/subtitle-pipeline --skill subtitle-pipeline --agent '*' --yes
 ```
 
 ## Publish & Discovery Essentials
@@ -71,8 +81,8 @@ If you want people to find and use this skill:
 
 1. Keep the repo **public**.
 2. Keep `SKILL.md` clean (`name` + clear `description`).
-3. Put the install snippet above in the README and share it in communities.
-4. Submit to curated skill lists/directories (e.g. skills ecosystem repos) for discovery.
+3. Put the universal install snippet above in the README and share it in communities.
+4. Submit to curated skill lists/directories (skills ecosystem repos, community lists, directories) for discovery.
 
 ## CLI Commands
 
