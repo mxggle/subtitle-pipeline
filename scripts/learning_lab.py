@@ -372,9 +372,9 @@ def translate_chunk(client, chunk: list[dict], target_language: str, model: str)
     if not OpenAI:
         raise RuntimeError("openai is not installed. Run: pip install openai")
         
-    prompt = f"You are a professional movie translator. Translate the following subtitle lines to {target_language}.\n\n"
-    prompt += "Respond ONLY with the translated lines, separated by the exact delimiter `|||`.\n"
-    prompt += f"There are exactly {len(chunk)} lines. You MUST return exactly {len(chunk)} translated blocks separated by `|||`. Do not include original text, notes, or preambles.\n"
+    prompt = f"You are a professional movie translator. Translate the following {len(chunk)} subtitle lines to {target_language}.\n\n"
+    prompt += "Respond ONLY with a valid JSON array of strings, where each string is the translated line. Do not include markdown formatting like ```json.\n"
+    prompt += f"There are exactly {len(chunk)} lines. You MUST return exactly {len(chunk)} translated strings in the JSON array. Do not include original text, notes, or preambles.\n"
     prompt += "Look at the surrounding context to resolve ambiguities, but keep the translations vertically aligned to the original indices.\n\n"
     
     for entry in chunk:
@@ -384,28 +384,37 @@ def translate_chunk(client, chunk: list[dict], target_language: str, model: str)
         response = client.chat.completions.create(
             model=model,
             messages=[
-                {"role": "system", "content": "You are a professional subtitle translator. Do not include extra conversational text."},
+                {"role": "system", "content": "You are a professional subtitle translator. You only output valid JSON arrays of strings."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.3
         )
         
-        content = response.choices[0].message.content
-        # Split by the specific delimiter
-        parts = content.split("|||")
-        # Clean up whitespace around parts
-        translated_texts = [p.strip() for p in parts]
+        content = response.choices[0].message.content.strip()
+        if content.startswith("```json"):
+            content = content[7:]
+        if content.startswith("```"):
+            content = content[3:]
+        if content.endswith("```"):
+            content = content[:-3]
+            
+        import json
+        try:
+            translated_texts = json.loads(content.strip())
+            if not isinstance(translated_texts, list):
+                raise ValueError("LLM did not return a JSON array")
+        except json.JSONDecodeError:
+            print(f"Warning: Failed to parse LLM output as JSON. Output was:\n{content}\nAttempting line-by-line fallback...", file=sys.stderr)
+            translated_texts = [p.strip() for p in content.strip().split('\n') if p.strip()]
         
         # Fallback/Safety Check: Ensure strictly identical length
         if len(translated_texts) != len(chunk):
-            print(f"Warning: LLM returned {len(translated_texts)} lines instead of {len(chunk)}. "
-                  "Attempting line-by-line fallback split...", file=sys.stderr)
-            # Try splitting by newlines if the delimiter failed and we have an exact match on lines
-            fallback_parts = [p.strip() for p in content.strip().split('\n') if p.strip()]
-            if len(fallback_parts) == len(chunk):
-                translated_texts = fallback_parts
-            else:
-                raise ValueError(f"LLM translation alignment failed: Expected {len(chunk)} translations, got {len(translated_texts)}.")
+            print(f"Warning: LLM returned {len(translated_texts)} lines instead of {len(chunk)}.", file=sys.stderr)
+            print(f"Warning: Fallback failed. Adding blank lines to match length. Expected {len(chunk)}, got {len(translated_texts)}.", file=sys.stderr)
+            # Just take what we can and pad the rest with empty strings
+            translated_texts = translated_texts[:len(chunk)]
+            while len(translated_texts) < len(chunk):
+                translated_texts.append("")
                 
         return translated_texts
         

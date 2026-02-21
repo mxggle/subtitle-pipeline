@@ -1,0 +1,464 @@
+1
+00:00:00,000 --> 00:00:10,600
+Many of you here have probably heard of the 10,000 hours rule.
+
+2
+00:00:11,060 --> 00:00:15,580
+It's the idea that to become great in anything takes 10,000 hours of focused practice,
+
+3
+00:00:15,820 --> 00:00:17,900
+so you'd better get started as early as possible.
+
+4
+00:00:18,620 --> 00:00:21,920
+The poster child for this story is Tiger Woods.
+
+5
+00:00:22,520 --> 00:00:25,560
+His father famously gave him a putter when he was seven months old.
+
+6
+00:00:26,120 --> 00:00:29,040
+Fast forward to the age of 21, he's the greatest golfer in the world.
+
+7
+00:00:29,040 --> 00:00:30,840
+It's a quintessential 10,000 hours story.
+
+8
+00:00:31,400 --> 00:00:33,420
+Another is that of the three Polger sisters,
+
+9
+00:00:33,660 --> 00:00:37,760
+whose father decided to teach them chess in a very technical manner from a very early age.
+
+10
+00:00:38,300 --> 00:00:40,560
+Two of his daughters went on to become grandmaster chess players.
+
+11
+00:00:41,260 --> 00:00:41,880
+I got curious.
+
+12
+00:00:42,280 --> 00:00:44,000
+If this 10,000 hours rule is correct,
+
+13
+00:00:44,140 --> 00:00:48,060
+then we should see that elite athletes get a head start in so-called deliberate practice.
+
+14
+00:00:48,520 --> 00:00:50,360
+And in fact, when scientists study elite athletes,
+
+15
+00:00:50,360 --> 00:00:53,380
+they see that they spend more time in deliberate practice.
+
+16
+00:00:53,720 --> 00:00:54,600
+Not a big surprise.
+
+17
+00:00:55,060 --> 00:00:58,100
+When they actually track athletes over the course of their development,
+
+18
+00:00:58,100 --> 00:00:59,460
+the pattern looks like this.
+
+19
+00:00:59,920 --> 00:01:03,220
+The future elites tend to have what scientists call a sampling period,
+
+20
+00:01:03,480 --> 00:01:05,340
+where they try a variety of physical activities,
+
+21
+00:01:05,640 --> 00:01:07,160
+they gain broad general skills,
+
+22
+00:01:07,360 --> 00:01:11,200
+and delay specializing until later than peers who plateau at lower levels.
+
+23
+00:01:11,660 --> 00:01:14,540
+That doesn't really comport with the 10,000 hours rule, does it?
+
+24
+00:01:15,040 --> 00:01:19,960
+So I started to wonder about other domains that we associate with obligatory early specialization,
+
+25
+00:01:20,400 --> 00:01:20,980
+like music.
+
+26
+00:01:21,380 --> 00:01:22,780
+Turns out the pattern's often similar.
+
+27
+00:01:22,780 --> 00:01:26,540
+The exceptional musicians didn't start spending more time in deliberate practice
+
+28
+00:01:26,540 --> 00:01:29,360
+than the average musicians until their third instrument.
+
+29
+00:01:29,660 --> 00:01:31,320
+They, too, tended to have a sampling period.
+
+30
+00:01:31,760 --> 00:01:35,120
+Even musicians we think of as famously precocious, like Yo-Yo Ma.
+
+31
+00:01:35,740 --> 00:01:40,220
+So this got me interested in exploring the developmental backgrounds of people whose work I had long admired.
+
+32
+00:01:40,520 --> 00:01:44,820
+Duke Ellington shunned music lessons as a kid to focus on baseball and painting and drawing.
+
+33
+00:01:44,820 --> 00:01:48,980
+Mariam Mirzakhani wasn't interested in math as a girl, dreamed of becoming a novelist,
+
+34
+00:01:49,480 --> 00:01:52,720
+and went on to become the first and so far only woman to win the Fields Medal,
+
+35
+00:01:52,820 --> 00:01:54,680
+the most prestigious prize in the world in math.
+
+36
+00:01:55,160 --> 00:01:59,500
+Vincent van Gogh had five different careers before flaming out spectacularly,
+
+37
+00:01:59,820 --> 00:02:03,860
+and in his late 20s picked up a book called The Guide to the ABCs of Drawing.
+
+38
+00:02:04,580 --> 00:02:07,620
+Claude Shannon was an electrical engineer at the University of Michigan
+
+39
+00:02:07,620 --> 00:02:09,980
+who took a philosophy course just to fulfill a requirement.
+
+40
+00:02:09,980 --> 00:02:13,580
+And in it, he learned about a near-century-old system of logic
+
+41
+00:02:13,580 --> 00:02:18,080
+by which true and false statements could be coded as ones and zeros and solved, like math problems.
+
+42
+00:02:18,480 --> 00:02:23,320
+This led to the development of binary code, which underlies all of our digital computers today.
+
+43
+00:02:23,840 --> 00:02:27,340
+Frances Hesselbein took her first professional job at the age of 54,
+
+44
+00:02:27,640 --> 00:02:29,560
+and went on to become the CEO of the Girl Scouts.
+
+45
+00:02:30,400 --> 00:02:31,820
+Here's an athlete I've followed.
+
+46
+00:02:32,140 --> 00:02:34,580
+He tried some tennis, some skiing, wrestling.
+
+47
+00:02:34,700 --> 00:02:37,200
+His mother was actually a tennis coach, but she declined to coach him
+
+48
+00:02:37,200 --> 00:02:38,680
+because he wouldn't return balls normally.
+
+49
+00:02:38,680 --> 00:02:40,220
+And he kept trying more sports.
+
+50
+00:02:40,680 --> 00:02:43,740
+Handball, volleyball, soccer, badminton, skateboarding.
+
+51
+00:02:43,920 --> 00:02:45,560
+So, who is this dabbler?
+
+52
+00:02:46,240 --> 00:02:47,400
+This is Roger Federer.
+
+53
+00:02:47,940 --> 00:02:50,620
+Every bit as famous as an adult as Tiger Woods,
+
+54
+00:02:50,940 --> 00:02:52,520
+and yet even tennis enthusiasts,
+
+55
+00:02:52,900 --> 00:02:55,560
+don't usually know anything about his developmental story.
+
+56
+00:02:55,820 --> 00:02:56,320
+Why is that?
+
+57
+00:02:57,020 --> 00:02:59,240
+Well, I think it's partly because the Tiger story is very dramatic,
+
+58
+00:02:59,580 --> 00:03:01,780
+but also because it seems like this tidy narrative
+
+59
+00:03:01,780 --> 00:03:05,420
+that we can extrapolate to anything that we want to be good at in our own lives.
+
+60
+00:03:05,420 --> 00:03:09,220
+But it turns out that in many ways, golf is a uniquely horrible model
+
+61
+00:03:09,220 --> 00:03:10,800
+of almost everything that humans want to learn.
+
+62
+00:03:11,480 --> 00:03:15,440
+Golf is the epitome of what the psychologist Robin Hogarth called a kind learning environment.
+
+63
+00:03:15,940 --> 00:03:19,720
+Next steps and goals are clear, rules are clear, and never change.
+
+64
+00:03:20,260 --> 00:03:23,180
+When you do something, you get feedback that is quick and accurate.
+
+65
+00:03:24,220 --> 00:03:26,160
+Chess, also a kind learning environment.
+
+66
+00:03:26,160 --> 00:03:29,460
+On the other end of the spectrum are wicked learning environments,
+
+67
+00:03:29,840 --> 00:03:31,960
+where next steps and goals may not be clear.
+
+68
+00:03:32,460 --> 00:03:33,460
+Rules may change.
+
+69
+00:03:34,020 --> 00:03:35,920
+You may or may not get feedback when you do something.
+
+70
+00:03:36,260 --> 00:03:37,940
+It may be delayed. It may be inaccurate.
+
+71
+00:03:38,300 --> 00:03:41,080
+Which one of these sounds like the world we're increasingly living in?
+
+72
+00:03:41,700 --> 00:03:45,160
+So, if hyperspecialization isn't always the trick in a wicked world, what is?
+
+73
+00:03:45,920 --> 00:03:47,280
+That can be difficult to talk about,
+
+74
+00:03:47,500 --> 00:03:51,140
+because sometimes it looks like meandering or zigzagging or keeping a broader view.
+
+75
+00:03:51,180 --> 00:03:52,500
+It can look like getting behind.
+
+76
+00:03:52,500 --> 00:03:55,140
+But if we look at research on technological innovation,
+
+77
+00:03:55,280 --> 00:03:59,440
+it shows that increasingly, the most impactful patents are authored by teams
+
+78
+00:03:59,440 --> 00:04:03,880
+that include individuals who have worked across a large number of different technology classes
+
+79
+00:04:03,880 --> 00:04:05,920
+and often merged things from different domains.
+
+80
+00:04:06,760 --> 00:04:09,440
+Someone whose work I've admired who is sort of on the forefront of this,
+
+81
+00:04:09,500 --> 00:04:11,320
+a Japanese man named Gunpei Yokoi.
+
+82
+00:04:11,700 --> 00:04:14,380
+Yokoi didn't score well in his electronics exams at school,
+
+83
+00:04:14,500 --> 00:04:17,360
+so he had to settle for a low-tier job as a machine maintenance worker
+
+84
+00:04:17,360 --> 00:04:18,800
+at a playing card company in Kyoto.
+
+85
+00:04:18,800 --> 00:04:22,280
+He combined some well-known technology from the calculator industry
+
+86
+00:04:22,280 --> 00:04:24,720
+with some well-known technology from the credit card industry
+
+87
+00:04:24,720 --> 00:04:26,180
+and made handheld games.
+
+88
+00:04:26,820 --> 00:04:28,500
+And it turned this playing card company,
+
+89
+00:04:28,780 --> 00:04:31,660
+which was founded in a wooden storefront in the 19th century,
+
+90
+00:04:32,060 --> 00:04:33,560
+into a toy and game operation.
+
+91
+00:04:33,940 --> 00:04:35,440
+You may have heard of it. It's called Nintendo.
+
+92
+00:04:35,820 --> 00:04:37,820
+His magnum opus was the Game Boy.
+
+93
+00:04:38,340 --> 00:04:41,260
+We probably don't make as many of those people as we could,
+
+94
+00:04:41,360 --> 00:04:43,060
+because we don't tend to incentivize anything
+
+95
+00:04:43,060 --> 00:04:45,440
+that doesn't look like a head start or specialization.
+
+96
+00:04:46,100 --> 00:04:49,760
+And naturally, I think there are as many ways to succeed as there are people.
+
+97
+00:04:49,760 --> 00:04:53,820
+But I think we tend only to incentivize and encourage the tiger path,
+
+98
+00:04:54,160 --> 00:04:55,460
+when increasingly in a wicked world,
+
+99
+00:04:55,540 --> 00:04:58,100
+we need people who travel the Roger path as well.
+
+100
+00:04:58,460 --> 00:05:01,280
+Or as the eminent physicist and mathematician and writer,
+
+101
+00:05:01,460 --> 00:05:02,620
+Freeman Dyson, put it,
+
+102
+00:05:02,980 --> 00:05:06,280
+for a healthy ecosystem, we need both birds and frogs.
+
+103
+00:05:06,780 --> 00:05:09,400
+Frogs are down in the mud seeing all the granular details.
+
+104
+00:05:09,880 --> 00:05:12,540
+The birds are soaring up above not seeing those details,
+
+105
+00:05:12,660 --> 00:05:14,440
+but integrating the knowledge of the frogs.
+
+106
+00:05:14,500 --> 00:05:15,300
+And we need both.
+
+107
+00:05:15,300 --> 00:05:17,000
+The problem, Dyson said,
+
+108
+00:05:17,200 --> 00:05:19,460
+is that we're telling everyone to become frogs.
+
+109
+00:05:20,200 --> 00:05:21,760
+And I think, in a wicked world,
+
+110
+00:05:21,920 --> 00:05:23,460
+that's increasingly short-sighted.
+
+111
+00:05:23,460 --> 00:05:28,540
+Education is the ultimate idea worth spreading.
+
+112
+00:05:28,540 --> 00:05:31,500
+That's why we have a channel dedicated exclusively
+
+113
+00:05:31,500 --> 00:05:36,020
+to celebrating and elevating the ideas of educators.
+
+114
+00:05:36,500 --> 00:05:38,180
+Visit our Educator Talks channel,
+
+115
+00:05:38,340 --> 00:05:41,380
+where you can also learn more about our educator programs.
+
+116
+00:05:41,960 --> 00:05:45,480
+Or watch the unabbreviated version of this talk here.
+

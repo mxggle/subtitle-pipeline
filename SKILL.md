@@ -14,8 +14,6 @@ It handles:
 4. Translating subtitle tracks (OpenAI-compatible APIs)
 5. Merging multilingual tracks into bilingual/multilingual SRT
 
-It does **not** generate learning markdown/vocabulary packs anymore.
-
 ## Workflow Decision Tree
 
 When processing a video file, choose the path based on available subtitles:
